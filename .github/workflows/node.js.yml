@@ -25,7 +25,7 @@ jobs:
           name: my-artifact
           path: public/
   test:
-   needs: build-step
+   needs: build
    runs-on: ubuntu-latest
    strategy:
     matrix:
