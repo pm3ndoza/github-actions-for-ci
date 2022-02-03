@@ -11,6 +11,7 @@ on:
 
 jobs:
   build:
+    - name: build-step
     runs-on: 
       - ubuntu-latest
     steps:
@@ -24,6 +25,7 @@ jobs:
           name: my-artifact
           path: public/
   test:
+   needs: build-step
    runs-on: ubuntu-latest
    strategy:
     matrix:
