@@ -24,7 +24,6 @@ jobs:
           name: webpack artifacts
           path: public/
   test:
-    if: steps.build-step.outputs.conclusion == 'success'
       runs-on: ubuntu-latest
       strategy:
         matrix:
@@ -40,6 +39,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: npm install, and test
+        if: steps.build-step.outputs.conclusion == 'success'
         run: |
           npm install
           npm test
