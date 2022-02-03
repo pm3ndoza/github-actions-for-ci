@@ -16,7 +16,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: npm install and build webpack
-      - id: build-step
         run: |
           npm install
           npm run build
@@ -24,25 +23,36 @@ jobs:
         with:
           name: webpack artifacts
           path: public/
-  test:
-    if: steps.build-step.outputs.conclision =='success'
-      runs-on: ubuntu-latest
-      strategy:
-        matrix:
-          os: [ubuntu-latest, windows-2016]
-          node-version: 
-          - 12.x
-          - 14.x
-      steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@main
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+      - name: Wait my build
+        uses: tomchv/wait-my-workflow@v1.1.0
+        id: wait-build
         with:
-          node-version: ${{ matrix.node-version }}
-      - name: npm install, and test
-        run: |
-          npm install
-          npm test
-        env:
-          CI: true
+          token: ${{ secrets.LABS_GITHUB_TOKEN }}
+          checkName: build
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          intervalSeconds: 10
+          timeoutSeconds: 100
+  test:
+   runs-on: ubuntu-latest
+   strategy:
+    matrix:
+      os: [ubuntu-latest, windows-2016]
+      node-version: 
+       - 12.x
+       - 14.x
+   steps:
+   - uses: actions/checkout@v2
+   - uses: actions/download-artifact@main
+   - name: Use Node.js ${{ matrix.node-version }}
+     uses: actions/setup-node@v1
+     with:
+       node-version: ${{ matrix.node-version }}
+   - name: Do something if build success
+        if: steps.wait-build.outputs.conclusion == 'success'
+        run: echo success && true
+   - name: npm install, and test
+     run: |
+       npm install
+       npm test
+     env:
+       CI: true
