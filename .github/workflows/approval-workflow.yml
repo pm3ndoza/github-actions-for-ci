@@ -3,11 +3,11 @@ on: pull_request_review
 jobs:
   labelWhenApproved:
     name: Label when approved
-    runs-on:ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Label When Approved
         uses: pull/reminders/label-when-approved-action@master
         env:
           APPROVALS: "1"
           GITHUB_TOKEN: ${{ secrets.LABS_GITHUB_TOKEN }}
-          ADD_LABEL: "approved"
+          ADD_LABEL: "Approved"
