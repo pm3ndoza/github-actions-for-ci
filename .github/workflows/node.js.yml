@@ -51,6 +51,12 @@ jobs:
      with:
        node-version: ${{ matrix.node-version }}
    - name: Do something if build success
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: build
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          intervalSeconds: 10
+          timeoutSeconds: 100
         if: steps.wait-build.outputs.conclusion == 'success'
         run: echo success && true
    - name: npm install, and test
