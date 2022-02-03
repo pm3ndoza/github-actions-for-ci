@@ -5,24 +5,36 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ main, fix-main-bug]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
 jobs:
   build:
-    runs-on: 
-      - ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
       - name: npm install and build webpack
         run: |
           npm install
           npm run build
       - uses: actions/upload-artifact@main
         with:
+          token: ${{ secrets.LABS_GITHUB_TOKEN  }}
+          checkName: build
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          intervalSeconds: 10
+          timeoutSeconds: 100
           name: webpack artifacts
           path: public/
+      - name: Wait my build
+        uses: tomchv/wait-my-workflow@v1.1.0
+        id: wait-build
+        with:
+          token: ${{ secrets.LABS_GITHUB_TOKEN }}
+          checkName: build
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          intervalSeconds: 10
+          timeoutSeconds: 100
   test:
    runs-on: ubuntu-latest
    strategy:
@@ -33,11 +45,16 @@ jobs:
        - 14.x
    steps:
    - uses: actions/checkout@v2
-   - uses: actions/download-artifact@main
    - name: Use Node.js ${{ matrix.node-version }}
      uses: actions/setup-node@v1
      with:
        node-version: ${{ matrix.node-version }}
+   - uses: actions/checkout@v2
+
+   - uses: actions/download-artifact@v2
+      with:
+        name: my-artifact
+        
    - name: npm install, and test
      run: |
        npm install
